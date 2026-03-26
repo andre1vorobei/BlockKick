@@ -28,3 +28,24 @@ pub fn verify_signature(public_key: &str, signature_hex: &str, data: &[u8]) -> b
 
     verifying_key.verify_strict(data, &signature).is_ok()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use ed25519_dalek::SigningKey;
+    use rand::rngs::OsRng;
+
+    #[test]
+    fn test_sign_and_verify() {
+        let signing_key = SigningKey::generate(&mut OsRng);
+        let public_key_hex = hex::encode(signing_key.verifying_key().to_bytes());
+
+        let data = b"some message";
+
+        let signature_hex = sign_data(&signing_key, data);
+
+        let result = verify_signature(&public_key_hex, &signature_hex, data);
+
+        assert!(result, "the signature must be valid");
+    }
+}
