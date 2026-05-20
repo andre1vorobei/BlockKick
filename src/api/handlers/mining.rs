@@ -116,7 +116,6 @@ pub fn handle_submit(
         let mut mp = mempool.lock().unwrap();
 
         for tx in &block.transactions {
-            // Coinbase не в мемпуле — пропускаем
             if tx.tx_type != crate::types::TransactionType::Coinbase {
                 mp.remove_transaction(&tx.id);
             }
@@ -140,10 +139,13 @@ pub fn handle_submit(
     }
 
     // 3. Валидируем и добавляем блок
-    if let Err(e) = chain.validate_and_add_block(block) {
+    if let Err(e) = chain.validate_and_add_block(block.clone()) {
         return send_error(request, StatusCode(400), &format!("Invalid block: {}", e));
     }
 
+    if let Some(net) = crate::network::get_global_network() {
+        net.broadcast_block(block.clone(), None); // None = всем пирам
+    }
     // Успех
     send_json(
         request,

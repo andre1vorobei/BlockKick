@@ -78,6 +78,10 @@ pub fn handle_post(
                 },
             );
         }
+
+        if let Some(net) = crate::network::get_global_network() {
+            net.broadcast_tx(tx.clone(), None); // None = всем пирам
+        }
     }
 
     // Успех

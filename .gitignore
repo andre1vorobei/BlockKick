@@ -2,3 +2,5 @@
 
 .vscode-ctags
 tags
+
+Cargo.lock
