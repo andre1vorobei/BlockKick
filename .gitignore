@@ -3,4 +3,4 @@
 .vscode-ctags
 tags
 
-Cargo.lock
+*.swp
