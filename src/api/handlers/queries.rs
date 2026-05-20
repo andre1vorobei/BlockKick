@@ -32,6 +32,7 @@ pub struct ProjectSummary {
     pub goal_amount: u64,
     pub raised_amount: u64,
     pub status: String,
+    pub creator_wallet: String,
 }
 
 // === GET /api/v1/balance/{address} ===
@@ -138,6 +139,7 @@ pub fn handle_projects(
                     goal_amount: data.goal_amount,
                     raised_amount: raised,
                     status,
+                    creator_wallet: data.creator_wallet.clone(),
                 });
             }
         }
