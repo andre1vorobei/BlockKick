@@ -24,3 +24,7 @@ bincode = "1.3"  # или оставь serde_json для простоты
 # Утилиты
 bytes = "1.5"
 futures = "0.3"
+
+log = "0.4"
+fern = "0.7"
+chrono = "0.4"

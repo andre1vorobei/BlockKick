@@ -3,6 +3,9 @@ use std::net::SocketAddr;
 use std::process;
 use std::sync::{Arc, Mutex};
 
+use chrono::Local;
+use fern::Dispatch;
+use log::{LevelFilter, debug, error, info, warn};
 // === Модули ===
 mod api;
 mod consensus;
@@ -12,14 +15,14 @@ mod network;
 mod state;
 mod storage;
 mod types;
-mod validator; // ← НОВЫЙ МОДУЛЬ для P2P
+mod validator;
 
 // === Импорт типов ===
-use api::server::{start_server, ApiContext};
+use api::server::{ApiContext, start_server};
 use mempool::mempool::Mempool;
 use network::NetworkService;
 use storage::blockchain::Blockchain;
-use types::Block; // ← НОВЫЙ ИМПОРТ
+use types::Block;
 
 /// Конфигурация ноды
 struct NodeConfig {
@@ -40,18 +43,58 @@ impl Default for NodeConfig {
     }
 }
 
+fn setup_logger() -> Result<(), fern::InitError> {
+    std::fs::create_dir_all("logs").ok();
+
+    let log_level = env::var("RUST_LOG")
+        .ok()
+        .and_then(|s| match s.to_lowercase().as_str() {
+            "error" => Some(LevelFilter::Error),
+            "warn" => Some(LevelFilter::Warn),
+            "info" => Some(LevelFilter::Info),
+            "debug" => Some(LevelFilter::Debug),
+            "trace" => Some(LevelFilter::Trace),
+            _ => None,
+        })
+        .unwrap_or(LevelFilter::Info);
+
+    Dispatch::new()
+        .format(|out, message, record| {
+            out.finish(format_args!(
+                "{} [{}] [{}] {}",
+                Local::now().format("%Y-%m-%d %H:%M:%S"),
+                record.target(),
+                record.level(),
+                message
+            ))
+        })
+        .level(log_level)
+        .level_for("BlockKick", log_level)
+        .level_for("tiny_http", LevelFilter::Warn)
+        .chain(std::io::stdout())
+        .chain(fern::log_file("logs/blockkick.log")?)
+        .apply()?;
+
+    Ok(())
+}
+
 #[tokio::main] // ← Асинхронная точка входа для P2P
 async fn main() {
-    println!("BlockKick Node v0.4.0 (P2P Enabled)");
-    println!("========================");
+    if let Err(e) = setup_logger() {
+        eprintln!("Failed to initialize logger: {}", e);
+        process::exit(1);
+    }
+
+    info!("BlockKick Node v0.4.0 (P2P Enabled)");
+    info!("========================");
 
     // Парсим аргументы командной строки
     let config = parse_args();
+    info!("Configuration loaded:");
+    info!("    HTTP Port:    {}", config.port);
+    info!("    P2P Port:     {}", config.p2p_port);
+    info!("    Difficulty:   {}", config.difficulty);
 
-    println!("Configuration:");
-    println!("   HTTP Port:      {}", config.port);
-    println!("   P2P Port:       {}", config.p2p_port);
-    println!("   Difficulty:     {}", config.difficulty);
     println!(
         "   Bootstrap Peers: {}",
         config
