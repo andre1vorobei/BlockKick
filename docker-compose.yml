@@ -1,0 +1,33 @@
+services:
+  blockkick:
+    build: .
+    container_name: blockkick-node
+    restart: unless-stopped
+    ports:
+      - "${API_PORT:-3000}:3000"
+      - "${P2P_PORT:-3001}:3001"
+    environment:
+      - RUST_LOG=${RUST_LOG:-info}
+      - API_PORT=3000
+      - P2P_PORT=3001
+      - DIFFICULTY=${DIFFICULTY:-4}
+      - PEER_NODES=${PEER_NODES:-}
+    volumes:
+      - ./logs:/app/logs
+      - blockchain_data:/app/data
+    networks:
+      - blockkick-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/v1/chain"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  blockkick-net:
+    driver: bridge
+    name: blockkick-network
+
+volumes:
+  blockchain_data:
