@@ -15,7 +15,7 @@ mod types;
 mod validator; // ← НОВЫЙ МОДУЛЬ для P2P
 
 // === Импорт типов ===
-use api::server::{start_server, ApiContext};
+use api::server::{ApiContext, start_server};
 use mempool::mempool::Mempool;
 use network::NetworkService;
 use storage::blockchain::Blockchain;

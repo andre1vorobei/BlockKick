@@ -1,6 +1,6 @@
+use crate::Blockchain;
 use crate::types::{Transaction, TransactionData, TransactionType};
 use crate::validator::Validator;
-use crate::Blockchain;
 
 /// Mempool - holds pending transactions waiting to be included in a block
 #[derive(Debug, Clone, Default)]

@@ -5,7 +5,7 @@ use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::mpsc;
 
 use crate::network::fork_resolver::{ForkResolver, ForkResult};
-use crate::network::message::{decode_message, encode_message, NetworkMessage};
+use crate::network::message::{NetworkMessage, decode_message, encode_message};
 use crate::network::peer_manager::{PeerInfo, PeerManager};
 use crate::storage::Blockchain;
 
