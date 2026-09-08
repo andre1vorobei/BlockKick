@@ -360,12 +360,6 @@ merkle_root = SHA256("empty")
 
 ---
 
-## Лицензия
-
-MIT License
-
----
-
 <div align="center">
 
 **Сделано для обучения блокчейн-технологиям**
